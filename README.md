@@ -109,3 +109,23 @@ The frontend hides protected dashboard screens from visitors, while the **backen
 ## Demo checklist (4–6 minutes)
 
 Show the visitor flow (home → projects → blog → search/filter → like → comment → contact), prove the dashboard is inaccessible while logged out, then log in as the demo owner and show creating/publishing/editing/deleting a post, approving a comment, and a mobile-width layout.
+
+
+
+## Screenshots
+
+### Home Page — Light Mode
+![Home Light](screenshots/Home_page_light.png)
+
+### Home Page — Dark Mode
+![Home Dark](screenshots/Home_page_dark.png)
+
+### Blog List
+![Blog List](screenshots/bloglist.png)
+
+### Blog Details
+![Blog Details](screenshots/blog_detail.png)
+
+### Owner Dashboard
+![Owner Dashboard](screenshots/Owner%20Dashboard.png)
+
