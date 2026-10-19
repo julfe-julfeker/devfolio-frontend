@@ -1,0 +1,239 @@
+
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import api from "../api/axios";
+
+const PAGE_SIZE = 6;
+
+const normalizeList = (data) =>
+  Array.isArray(data) ? data : data?.results || [];
+
+export default function Projects() {
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("ALL");
+  const [ordering, setOrdering] = useState("newest");
+  const [page, setPage] = useState(1);
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const response = await api.get("projects/", {
+        params: { page_size: 1000 },
+      });
+      return response.data;
+    },
+  });
+
+  const projects = normalizeList(data);
+
+  const categories = [
+    "ALL",
+    ...new Set(projects.map((p) => p.category).filter(Boolean)),
+  ];
+
+  const filteredProjects = projects
+    .filter((project) => {
+      const keyword = search.trim().toLowerCase();
+
+      const matchesSearch = `${project.title || ""} ${
+        project.summary || ""
+      }`
+        .toLowerCase()
+        .includes(keyword);
+
+      const matchesCategory =
+        category === "ALL" || project.category === category;
+
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (ordering === "title_asc") {
+        return (a.title || "").localeCompare(b.title || "");
+      }
+
+      if (ordering === "title_desc") {
+        return (b.title || "").localeCompare(a.title || "");
+      }
+
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+
+      return ordering === "oldest"
+        ? dateA - dateB
+        : dateB - dateA;
+    });
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProjects.length / PAGE_SIZE)
+  );
+
+  const visibleProjects = filteredProjects.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, category, ordering]);
+
+  return (
+    <section className="mx-auto min-h-screen max-w-7xl px-6 py-20">
+      <p className="mb-3 font-mono text-cyan-400">
+        &gt; portfolio.projects
+      </p>
+
+      <h1 className="text-4xl font-bold md:text-5xl">
+        My <span className="text-cyan-400">Projects</span>
+      </h1>
+
+      <p className="mt-4 text-slate-400">
+        Explore my work and development projects.
+      </p>
+
+      {/* SEARCH & FILTER */}
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <input
+          type="search"
+          placeholder="Search projects..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="rounded-lg border border-slate-700 bg-slate-900 p-3 text-white outline-none focus:border-cyan-400"
+        />
+
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="rounded-lg border border-slate-700 bg-slate-900 p-3 text-white outline-none focus:border-cyan-400"
+        >
+          <option value="ALL">All Categories</option>
+          {categories
+            .filter((item) => item !== "ALL")
+            .map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+        </select>
+
+        <select
+          value={ordering}
+          onChange={(e) => setOrdering(e.target.value)}
+          className="rounded-lg border border-slate-700 bg-slate-900 p-3 text-white outline-none focus:border-cyan-400"
+        >
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="title_asc">Title A–Z</option>
+          <option value="title_desc">Title Z–A</option>
+        </select>
+      </div>
+
+      {isLoading && (
+        <p className="mt-10 text-slate-400">
+          Loading projects...
+        </p>
+      )}
+
+      {isError && (
+        <p className="mt-10 text-red-400">
+          Unable to load projects. Check Django API.
+        </p>
+      )}
+
+      {!isLoading && !isError && (
+        <>
+          <p className="mt-6 text-sm text-slate-400">
+            Showing {visibleProjects.length} of{" "}
+            {filteredProjects.length} projects
+          </p>
+
+          {filteredProjects.length === 0 ? (
+            <p className="mt-10 text-slate-400">
+              No projects found.
+            </p>
+          ) : (
+            <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {visibleProjects.map((project) => (
+                <article
+                  key={project.id}
+                  className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900 transition hover:border-cyan-400"
+                >
+                  {project.cover_image && (
+                    <img
+                      src={project.cover_image}
+                      alt={project.title}
+                      className="h-52 w-full object-cover"
+                    />
+                  )}
+
+                  <div className="p-6">
+                    <p className="mb-3 text-xs uppercase text-cyan-400">
+                      {project.category}
+                    </p>
+
+                    <h2 className="text-xl font-bold">
+                      {project.title}
+                    </h2>
+
+                    <p className="mt-3 text-sm leading-6 text-slate-400">
+                      {project.summary}
+                    </p>
+
+                    <Link
+                      to={`/projects/${project.slug}`}
+                      className="mt-6 inline-block font-semibold text-cyan-400 hover:text-cyan-300"
+                    >
+                      View Details →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="rounded-lg border border-slate-700 px-4 py-2 disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              {Array.from(
+                { length: totalPages },
+                (_, index) => index + 1
+              ).map((number) => (
+                <button
+                  key={number}
+                  type="button"
+                  onClick={() => setPage(number)}
+                  className={`rounded-lg px-4 py-2 ${
+                    page === number
+                      ? "bg-cyan-400 font-semibold text-slate-950"
+                      : "border border-slate-700 text-white"
+                  }`}
+                >
+                  {number}
+                </button>
+              ))}
+
+              <button
+                type="button"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded-lg border border-slate-700 px-4 py-2 disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
