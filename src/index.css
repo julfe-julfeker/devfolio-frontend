@@ -1,1 +1,44 @@
+
 @import "tailwindcss";
+
+/* Home page: light theme */
+[data-theme="light"] .home-page {
+  color: #0f172a;
+}
+
+[data-theme="light"] .home-page [class~="text-white"],
+[data-theme="light"] .home-page [class~="text-slate-300"] {
+  color: #1e293b;
+}
+
+[data-theme="light"] .home-page [class~="text-slate-400"],
+[data-theme="light"] .home-page [class~="text-slate-500"] {
+  color: #475569;
+}
+
+[data-theme="light"] .home-page [class~="bg-slate-900"],
+[data-theme="light"] .home-page [class~="bg-slate-950"] {
+  background-color: #ffffff;
+}
+
+[data-theme="light"] .home-page [class~="bg-slate-900/50"] {
+  background-color: #eaf1f8;
+}
+
+[data-theme="light"] .home-page [class~="border-slate-800"],
+[data-theme="light"] .home-page [class~="border-slate-700"] {
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .home-page [class~="text-cyan-400"] {
+  color: #0891b2;
+}
+
+/* Preserve readable text on cyan buttons */
+[data-theme="light"] .home-page [class~="bg-cyan-400"] {
+  background-color: #22d3ee;
+}
+
+[data-theme="light"] .home-page [class~="text-slate-950"] {
+  color: #020617;
+}

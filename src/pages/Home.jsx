@@ -88,7 +88,7 @@ export default function Home() {
     .slice(0, 3);
 
   return (
-    <div className="text-white">
+    <div className="home-page">
       {/* HERO SECTION */}
       <section className="mx-auto flex min-h-[75vh] max-w-7xl flex-col justify-center px-6 py-24">
         <p className="mb-5 font-mono text-cyan-400">
